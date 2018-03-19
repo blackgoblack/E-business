@@ -19,3 +19,12 @@ RUN apt-get install scala
 # download play framework & slick
 RUN wget https://www.lightbend.com/activator/template/bundle/play-slick
 
+# install mysql client
+RUN apt-get install mysql-client
+
+# install mysql client
+RUN apt-get install mysql-server
+
+RUN apt-get update
+
+
