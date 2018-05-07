@@ -12,19 +12,19 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class BasketController @Inject()(basketRepository: BasketRepository, productRepository: ProductRepository,
-                                     cc: MessagesControllerComponents
-                                    )(implicit ec: ExecutionContext)
+class ReviewController @Inject()(reviewRepository: ReviewRepository, productRepository: ProductRepository,
+                                 cc: MessagesControllerComponents
+                                )(implicit ec: ExecutionContext)
   extends MessagesAbstractController(cc) {
 
   /**
     * The mapping for the person form.
     */
-  val basketForm: Form[CreateBasketForm] = Form {
+  val reviewForm: Form[CreateReviewForm] = Form {
     mapping(
       "product" -> number,
-      "amount" -> number
-    )(CreateBasketForm.apply)(CreateBasketForm.unapply)
+      "descriptiont" -> nonEmptyText
+    )(CreateReviewForm.apply)(CreateReviewForm.unapply)
   }
 
   /**
@@ -32,7 +32,7 @@ class BasketController @Inject()(basketRepository: BasketRepository, productRepo
     */
   def index = Action.async { implicit request =>
     val product = productRepository.list()
-    product.map(prod => Ok(views.html.basket(basketForm,prod)))
+    product.map(prod => Ok(views.html.review(reviewForm,prod)))
 
     /*
     .onComplete{
@@ -52,7 +52,7 @@ class BasketController @Inject()(basketRepository: BasketRepository, productRepo
     }
   */
 
-  def addBasket = Action.async { implicit request =>
+  def addReview = Action.async { implicit request =>
     // Bind the form first, then fold the result, passing a function to handle errors, and a function to handle succes.
     var a:Seq[Product] = Seq[Product]()
     val product = productRepository.list().onComplete{
@@ -60,20 +60,20 @@ class BasketController @Inject()(basketRepository: BasketRepository, productRepo
       case Failure(_) => print("fail")
     }
 
-    basketForm.bindFromRequest.fold(
+    reviewForm.bindFromRequest.fold(
       // The error function. We return the index page with the error form, which will render the errors.
       // We also wrap the result in a successful future, since this action is synchronous, but we're required to return
       // a future because the person creation function returns a future.
       errorForm => {
         Future.successful(
-          Ok(views.html.basket(errorForm,a))
+          Ok(views.html.review(errorForm,a))
         )
       },
       // There were no errors in the from, so create the person.
-      basket => {
-        basketRepository.create(basket.product, basket.amount).map { _ =>
+      review => {
+        reviewRepository.create(review.product, review.description).map { _ =>
           // If successful, we simply redirect to the index page.
-          Redirect(routes.BasketController.index).flashing("success" -> "product.created")
+          Redirect(routes.ReviewController.index).flashing("success" -> "product.created")
         }
       }
     )
@@ -83,9 +83,9 @@ class BasketController @Inject()(basketRepository: BasketRepository, productRepo
   /**
     * A REST endpoint that gets all the people as JSON.
     */
-  def getBasket = Action.async { implicit request =>
-    basketRepository.list().map { basket =>
-      Ok(Json.toJson(basket))
+  def getReview = Action.async { implicit request =>
+    reviewRepository.list().map { review =>
+      Ok(Json.toJson(review))
     }
   }
 }
@@ -97,4 +97,4 @@ class BasketController @Inject()(basketRepository: BasketRepository, productRepo
   * in a different way to your models.  In this case, it doesn't make sense to have an id parameter in the form, since
   * that is generated once it's created.
   */
-case class CreateBasketForm(product: Int, amount: Int)
+case class CreateReviewForm(product: Int, description: String)

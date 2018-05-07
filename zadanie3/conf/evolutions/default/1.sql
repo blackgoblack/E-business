@@ -26,7 +26,14 @@ create table "order" (
   "value" double not null,
   basket int not null,
   foreign key(Basket) references Basket(id)
+};
 
+create table "review" (
+  "id" integer not null primary key autoincrement,
+  product int not null,
+  "description" text not null,
+  foreign key(product) references product(id)
+);
 
 # --- !Downs
 

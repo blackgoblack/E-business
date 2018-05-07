@@ -1,0 +1,26 @@
+@(review: Form[CreateReviewForm], products: Seq[Product])(implicit request: MessagesRequestHeader)
+
+@import helper._
+
+@request.flash.get("success").map { key =>
+    @request.messages(key)
+}
+
+@main("Welcome to Ebiznes") {
+    @form(routes.ReviewkController.addReview()) {
+        @inputText(review("description"))
+
+        <select name="product" id="product">
+        @for(pro <- products) {
+            <option value="@pro.id">@pro.name</option>
+        }
+        </select>
+
+
+        @CSRF.formField
+
+        <div class="buttons">
+            <input type="submit" value="Add Review"/>
+        </div>
+    }
+}
