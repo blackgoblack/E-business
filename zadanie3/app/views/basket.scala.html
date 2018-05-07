@@ -1,0 +1,26 @@
+@(basket: Form[CreateBasketForm], products: Seq[Product])(implicit request: MessagesRequestHeader)
+
+@import helper._
+
+@request.flash.get("success").map { key =>
+    @request.messages(key)
+}
+
+@main("Welcome to Ebiznes") {
+    @form(routes.BasketkController.addBasket()) {
+        @inputText(basket("amount"))
+
+        <select name="product" id="product">
+        @for(pro <- products) {
+            <option value="@pro.id">@pro.name</option>
+        }
+        </select>
+
+
+        @CSRF.formField
+
+        <div class="buttons">
+            <input type="submit" value="Add Product"/>
+        </div>
+    }
+}

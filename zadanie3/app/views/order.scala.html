@@ -1,0 +1,27 @@
+@(order: Form[CreateOrderForm],basket: Seq[Basket])(implicit request: MessagesRequestHeader)
+
+@import helper._
+
+@request.flash.get("success").map { key =>
+    @request.messages(key)
+}
+
+@main("Welcome to Ebiznes") {
+    @form(routes.OrderController.addOrder()) {
+        @inputText(order("date"))
+        @inputText(order("value"))
+
+        <select name="basket" id="basket">
+        @for(bas <- basket){
+            <option value="@bas.id">@bas.id</option>
+        }
+        </select>
+
+
+        @CSRF.formField
+
+        <div class="buttons">
+            <input type="submit" value="Add Order"/>
+        </div>
+    }
+}
